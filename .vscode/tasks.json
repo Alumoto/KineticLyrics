@@ -1,0 +1,14 @@
+
+{
+  "version": "2.0.0",
+  "command": "D:\\Software\\N-Z\\processing-3.5.3\\processing-java",
+  "isShellCommand": true,
+  "showOutput": "never",
+  "args": [
+      "--force",
+      "--sketch=${workspaceRoot}",
+      "--output=${workspaceRoot}\\out",
+      "--run"
+  ],
+  "problemMatchers": []
+}
