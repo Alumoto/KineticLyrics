@@ -52,11 +52,11 @@ AudioPlayer player;
 
 
 public static final int WIDTH = 1200;
-public static final int HEIGHT = 960;
+public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-final String LYRICS_FILE = "tosyokan.kra";
-final String MUSIC_FILE = "図書館で会った人だぜ.mp3";
+final String LYRICS_FILE = "Who Put the Bomp.kra";
+final String MUSIC_FILE = "Who Put The Bomp.mp3";
 String[] kasi = null;
 
 String regex = "\\[(.+?)\\]";
@@ -90,9 +90,12 @@ int timeDiff;
 
 int nowTime;
 
+public void settings(){
+    size(WIDTH, HEIGHT);
+}
 
 public void setup(){
-    
+    smooth();
     background(100);
     //String[] fontList = PFont.list();
     //printArray(fontList);
@@ -119,7 +122,9 @@ public void setup(){
             mode = 1;
             break;
     }
-   
+    
+    
+
     stMillis = millis();
     player.play();
 }
@@ -295,7 +300,6 @@ public static String getSuffix(String fileName) {
     }
     return fileName;
 }
-  public void settings() {  size(1200 , 960); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "KineticLyrics" };
     if (passedArgs != null) {
