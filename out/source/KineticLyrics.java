@@ -3,7 +3,6 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
-import java.util.Date; 
 import java.util.ArrayList; 
 import java.text.*; 
 
@@ -17,7 +16,6 @@ import java.io.OutputStream;
 import java.io.IOException; 
 
 public class KineticLyrics extends PApplet {
-
 
 
 
