@@ -6,6 +6,30 @@ import processing.opengl.*;
 import java.util.Date; 
 import java.util.ArrayList; 
 import java.text.*; 
+import ddf.minim.*; 
+
+import javazoom.jl.converter.*; 
+import javazoom.jl.decoder.*; 
+import javazoom.jl.player.*; 
+import javazoom.jl.player.advanced.*; 
+import ddf.minim.javasound.*; 
+import ddf.minim.*; 
+import ddf.minim.analysis.*; 
+import ddf.minim.effects.*; 
+import ddf.minim.signals.*; 
+import ddf.minim.spi.*; 
+import ddf.minim.ugens.*; 
+import javazoom.spi.*; 
+import javazoom.spi.mpeg.sampled.convert.*; 
+import javazoom.spi.mpeg.sampled.file.*; 
+import javazoom.spi.mpeg.sampled.file.tag.*; 
+import org.tritonus.sampled.file.*; 
+import org.tritonus.share.*; 
+import org.tritonus.share.midi.*; 
+import org.tritonus.share.sampled.*; 
+import org.tritonus.share.sampled.convert.*; 
+import org.tritonus.share.sampled.file.*; 
+import org.tritonus.share.sampled.mixer.*; 
 
 import java.util.HashMap; 
 import java.util.ArrayList; 
@@ -22,16 +46,22 @@ public class KineticLyrics extends PApplet {
 
 
 
+
+Minim minim;
+AudioPlayer player;
+
+
 public static final int WIDTH = 1200;
 public static final int HEIGHT = 960;
 public static final int TX_SIZE = 100;
 
-final String FILE_NAME = "tosyokan.kra";
+final String LYRICS_FILE = "tosyokan.kra";
+final String MUSIC_FILE = "図書館で会った人だぜ.mp3";
 String[] kasi = null;
 
 String regex = "\\[(.+?)\\]";
 SimpleDateFormat format = new SimpleDateFormat("mm:ss:SS");
-SimpleDateFormat msformat = new SimpleDateFormat("SSSSSSSSS");
+SimpleDateFormat msformat = new SimpleDateFormat("SSSSSSSSSS");
 
 int mode = 0;
 int stMillis = 0;
@@ -71,14 +101,17 @@ public void setup(){
     textSize(TX_SIZE);
     textAlign(CENTER, CENTER);
     fill(0);
-    kasi = loadStrings( FILE_NAME );
+    kasi = loadStrings( LYRICS_FILE );
     if( kasi == null ){
         //読み込み失敗
-        println( FILE_NAME + " 読み込み失敗" );
+        println( LYRICS_FILE + " 読み込み失敗" );
         exit();
     }
 
-    switch(getSuffix(FILE_NAME)){
+    minim=new Minim(this);
+    player = minim.loadFile("../music/"+MUSIC_FILE);
+
+    switch(getSuffix(LYRICS_FILE)){
         case "txt":
             mode = 0;
             break;
@@ -87,8 +120,8 @@ public void setup(){
             break;
     }
    
-   stMillis = millis();
-
+    stMillis = millis();
+    player.play();
 }
 
 
@@ -104,30 +137,18 @@ public void draw(){
                     String[][] timeTags = matchAll(kasi[kasiNo], regex);
                     String[] kasiSpl = split(kasi[kasiNo].replaceAll(regex, "[**]"), "[**]");
                     kasi[kasiNo] = kasi[kasiNo].replaceAll(regex, ""); 
-                    // ArrayList<String> aryTimeTags = new ArrayList<String>();
-                    // for(int k = 0; k < timeTags.length; k++){
-                    //     try{
-                    //         aryTimeTags.add(format.parse(timeTags[k][1]));
-                    //     } catch(java.text.ParseException e){
-                    //         e.printStackTrace();
-                    //     }
-                    // }
 
                     ArrayList<Integer> msTimeTags = new ArrayList<Integer>();
                     for(int k = 0; k < timeTags.length; k++){
                         String[] buff = split(timeTags[k][1], ":");
                         msTimeTags.add(Integer.parseInt(buff[0])*60000 + Integer.parseInt(buff[1])*1000 + Integer.parseInt(buff[2])*10);
                     }
-                    
-                    // startTime = aryTimeTags.get(0).getTime();
-                    // endTime = aryTimeTags.get(aryTimeTags.size()-1).getTime();
-                    // timeDiff = endTime - startTime;
 
                     startTime = msTimeTags.get(0);
                     endTime = msTimeTags.get(msTimeTags.size()-1);
                     timeDiff = endTime - startTime;              
                     
-                    println("st: "+startTime+"  end:"+endTime+"  diff:"+timeDiff);
+                    //println("st: "+startTime+"  end:"+endTime+"  diff:"+timeDiff);
 
                     firstRun = true;
                 }
@@ -144,7 +165,7 @@ public void draw(){
 
             nowTime = millis() - stMillis;
 
-            println("start: "+ startTime + "   now:"+ nowTime );
+            //println("start: "+ startTime + "   now:"+ nowTime );
 
             if(startTime <= nowTime){
                 switch(animeNo){
@@ -169,6 +190,12 @@ public void draw(){
         background(255);
     }
     
+}
+
+public void stop(){
+    player.close();
+    minim.stop();
+    super.stop();
 }
 
 public void charAppearLeftToRight(){
