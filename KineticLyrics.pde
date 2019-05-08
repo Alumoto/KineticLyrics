@@ -1,16 +1,22 @@
 import java.util.ArrayList;
 import java.text.*;
+import ddf.minim.*;
+
+Minim minim;
+AudioPlayer player;
+
 
 public static final int WIDTH = 1200;
-public static final int HEIGHT = 960;
+public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-final String FILE_NAME = "tosyokan.kra";
+final String LYRICS_FILE = "Who Put the Bomp.kra";
+final String MUSIC_FILE = "Who Put The Bomp.mp3";
 String[] kasi = null;
 
 String regex = "\\[(.+?)\\]";
 SimpleDateFormat format = new SimpleDateFormat("mm:ss:SS");
-SimpleDateFormat msformat = new SimpleDateFormat("SSSSSSSSS");
+SimpleDateFormat msformat = new SimpleDateFormat("SSSSSSSSSS");
 
 int mode = 0;
 int stMillis = 0;
@@ -39,9 +45,12 @@ int timeDiff;
 
 int nowTime;
 
+void settings(){
+    size(WIDTH, HEIGHT);
+}
 
 void setup(){
-    size(1200 , 960);
+    smooth();
     background(100);
     //String[] fontList = PFont.list();
     //printArray(fontList);
@@ -50,14 +59,17 @@ void setup(){
     textSize(TX_SIZE);
     textAlign(CENTER, CENTER);
     fill(0);
-    kasi = loadStrings( FILE_NAME );
+    kasi = loadStrings( LYRICS_FILE );
     if( kasi == null ){
         //読み込み失敗
-        println( FILE_NAME + " 読み込み失敗" );
+        println( LYRICS_FILE + " 読み込み失敗" );
         exit();
     }
 
-    switch(getSuffix(FILE_NAME)){
+    minim=new Minim(this);
+    player = minim.loadFile("../music/"+MUSIC_FILE);
+
+    switch(getSuffix(LYRICS_FILE)){
         case "txt":
             mode = 0;
             break;
@@ -65,9 +77,11 @@ void setup(){
             mode = 1;
             break;
     }
-   
-   stMillis = millis();
+    
+    
 
+    stMillis = millis();
+    player.play();
 }
 
 
@@ -83,30 +97,18 @@ void draw(){
                     String[][] timeTags = matchAll(kasi[kasiNo], regex);
                     String[] kasiSpl = split(kasi[kasiNo].replaceAll(regex, "[**]"), "[**]");
                     kasi[kasiNo] = kasi[kasiNo].replaceAll(regex, ""); 
-                    // ArrayList<String> aryTimeTags = new ArrayList<String>();
-                    // for(int k = 0; k < timeTags.length; k++){
-                    //     try{
-                    //         aryTimeTags.add(format.parse(timeTags[k][1]));
-                    //     } catch(java.text.ParseException e){
-                    //         e.printStackTrace();
-                    //     }
-                    // }
 
                     ArrayList<Integer> msTimeTags = new ArrayList<Integer>();
                     for(int k = 0; k < timeTags.length; k++){
                         String[] buff = split(timeTags[k][1], ":");
                         msTimeTags.add(Integer.parseInt(buff[0])*60000 + Integer.parseInt(buff[1])*1000 + Integer.parseInt(buff[2])*10);
                     }
-                    
-                    // startTime = aryTimeTags.get(0).getTime();
-                    // endTime = aryTimeTags.get(aryTimeTags.size()-1).getTime();
-                    // timeDiff = endTime - startTime;
 
                     startTime = msTimeTags.get(0);
                     endTime = msTimeTags.get(msTimeTags.size()-1);
                     timeDiff = endTime - startTime;              
                     
-                    println("st: "+startTime+"  end:"+endTime+"  diff:"+timeDiff);
+                    //println("st: "+startTime+"  end:"+endTime+"  diff:"+timeDiff);
 
                     firstRun = true;
                 }
@@ -123,7 +125,7 @@ void draw(){
 
             nowTime = millis() - stMillis;
 
-            println("start: "+ startTime + "   now:"+ nowTime );
+            //println("start: "+ startTime + "   now:"+ nowTime );
 
             if(startTime <= nowTime){
                 switch(animeNo){
@@ -148,6 +150,12 @@ void draw(){
         background(255);
     }
     
+}
+
+void stop(){
+    player.close();
+    minim.stop();
+    super.stop();
 }
 
 void charAppearLeftToRight(){
