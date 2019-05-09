@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.text.*;
+import java.io.File;
 import ddf.minim.*;
 
 Minim minim;
@@ -10,8 +11,8 @@ public static final int WIDTH = 1200;
 public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-final String LYRICS_FILE = "Who Put the Bomp.kra";
-final String MUSIC_FILE = "Who Put The Bomp.mp3";
+String LYRICS_FILE = "kra/Who Put the Bomp.kra";
+String MUSIC_FILE = "Who Put The Bomp.mp3";
 String[] kasi = null;
 
 String regex = "\\[(.+?)\\]";
@@ -66,6 +67,15 @@ void setup(){
         exit();
     }
 
+    for(int k = 0;k<kasi.length;k++){
+        if(kasi[k].length() != 0){
+            if(kasi[k].charAt(0) == '@'){
+                kasi[k] = "";
+                println("replase"+kasi[k]);
+            }
+        }
+    }
+
     minim=new Minim(this);
     player = minim.loadFile("../music/"+MUSIC_FILE);
 
@@ -93,7 +103,7 @@ void draw(){
         if(kasi[kasiNo].length() != 0){
 
             if(endFlag == 1){   //initialize
-                if(mode == 1){
+                if(mode == 1){ //kraファイルのとき
                     String[][] timeTags = matchAll(kasi[kasiNo], regex);
                     String[] kasiSpl = split(kasi[kasiNo].replaceAll(regex, "[**]"), "[**]");
                     kasi[kasiNo] = kasi[kasiNo].replaceAll(regex, ""); 
@@ -115,19 +125,14 @@ void draw(){
                 animeNo = (int)random(3);
                 animeNo = 0;
                 endFlag = 0;
-                // for(int k = 0;k<aryTimeTags.size(); k++){
-                //     println(format.format(aryTimeTags.get(k)));
-                // }
-                // for(int k = 0;k<kasiSpl.length; k++){
-                //     println(kasiSpl[k]);
-                // }
+
             }
 
             nowTime = millis() - stMillis;
 
             //println("start: "+ startTime + "   now:"+ nowTime );
 
-            if(startTime <= nowTime){
+            if(startTime <= nowTime){ //動作きめる
                 switch(animeNo){
                     case 0:
                         strScroll(timeDiff);
@@ -147,7 +152,9 @@ void draw(){
         }
 
     }else{
+        while(player.isPlaying()){
         background(255);
+        }
     }
     
 }
@@ -255,3 +262,4 @@ public static String getSuffix(String fileName) {
     }
     return fileName;
 }
+
