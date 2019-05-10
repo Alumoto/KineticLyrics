@@ -55,13 +55,19 @@ public static final int WIDTH = 1200;
 public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-String LYRICS_FILE = "kra/Who Put the Bomp.kra";
-String MUSIC_FILE = "Who Put The Bomp.mp3";
+final String LYRICS_DIR = "../../kra";
+final String MUSICS_DIR = "../music";
+String LYRICS_FILE = "tosyokan.kra";
+String MUSIC_FILE = "図書館で会った人だぜ.mp3";
 String[] kasi = null;
 
 String regex = "\\[(.+?)\\]";
 SimpleDateFormat format = new SimpleDateFormat("mm:ss:SS");
 SimpleDateFormat msformat = new SimpleDateFormat("SSSSSSSSSS");
+
+File karDir = new File(LYRICS_DIR);
+File mscDir = new File(MUSICS_DIR);
+
 
 int mode = 0;
 int stMillis = 0;
@@ -89,6 +95,7 @@ int endTime;
 int timeDiff;
 
 int nowTime;
+String runMode = null;
 
 public void settings(){
     size(WIDTH, HEIGHT);
@@ -104,24 +111,40 @@ public void setup(){
     textSize(TX_SIZE);
     textAlign(CENTER, CENTER);
     fill(0);
-    kasi = loadStrings( LYRICS_FILE );
+    println( LYRICS_DIR +"/"+ LYRICS_FILE );
+    kasi = loadStrings( LYRICS_DIR +"/"+ LYRICS_FILE );
+    
+    minim=new Minim(this);
+    player = minim.loadFile( MUSICS_DIR +"/"+  MUSIC_FILE );
+
+    String karList[] = karDir.list();
+    String mscList[] = mscDir.list();
+    
+
+    //読み込み成功チェック
     if( kasi == null ){
-        //読み込み失敗
         println( LYRICS_FILE + " 読み込み失敗" );
+        exit();
+    }
+    if( karList == null ){
+        println( "kraフォルダ内ファイルの取得に失敗" );
+        exit();
+    }
+    if( mscList == null ){
+        println( "musicフォルダ内ファイルの取得に失敗");
+        exit();
+    }
+    if( player == null){
+        println( "音楽ファイルが読み込まれていません");
         exit();
     }
 
     for(int k = 0;k<kasi.length;k++){
         if(kasi[k].length() != 0){
-            if(kasi[k].charAt(0) == '@'){
-                kasi[k] = "";
-                println("replase"+kasi[k]);
-            }
+            if(kasi[k].charAt(0) == '@') kasi[k] = "";
         }
     }
 
-    minim=new Minim(this);
-    player = minim.loadFile("../music/"+MUSIC_FILE);
 
     switch(getSuffix(LYRICS_FILE)){
         case "txt":
@@ -132,7 +155,7 @@ public void setup(){
             break;
     }
     
-    
+    runMode = "SELECT";
 
     stMillis = millis();
     player.play();
@@ -142,66 +165,81 @@ public void setup(){
 
 public void draw(){
     background(255);
-    if(kasiNo < kasi.length){
+    switch(runMode){
 
-        if(kasi[kasiNo].length() != 0){
 
-            if(endFlag == 1){   //initialize
-                if(mode == 1){ //kraファイルのとき
-                    String[][] timeTags = matchAll(kasi[kasiNo], regex);
-                    String[] kasiSpl = split(kasi[kasiNo].replaceAll(regex, "[**]"), "[**]");
-                    kasi[kasiNo] = kasi[kasiNo].replaceAll(regex, ""); 
+        case "SELECT":
+            //歌詞ファイル・音源セレクト
 
-                    ArrayList<Integer> msTimeTags = new ArrayList<Integer>();
-                    for(int k = 0; k < timeTags.length; k++){
-                        String[] buff = split(timeTags[k][1], ":");
-                        msTimeTags.add(Integer.parseInt(buff[0])*60000 + Integer.parseInt(buff[1])*1000 + Integer.parseInt(buff[2])*10);
+            runMode = "PLAY";
+            break;
+        
+
+
+        case "PLAY":
+            //再生
+            if(kasiNo < kasi.length){
+
+                if(kasi[kasiNo].length() != 0){
+
+                    if(endFlag == 1){   //initialize
+                        if(mode == 1){ //kraファイルのとき
+                            String[][] timeTags = matchAll(kasi[kasiNo], regex);
+                            String[] kasiSpl = split(kasi[kasiNo].replaceAll(regex, "[**]"), "[**]");
+                            kasi[kasiNo] = kasi[kasiNo].replaceAll(regex, ""); 
+
+                            ArrayList<Integer> msTimeTags = new ArrayList<Integer>();
+                            for(int k = 0; k < timeTags.length; k++){
+                                String[] buff = split(timeTags[k][1], ":");
+                                msTimeTags.add(Integer.parseInt(buff[0])*60000 + Integer.parseInt(buff[1])*1000 + Integer.parseInt(buff[2])*10);
+                            }
+
+                            startTime = msTimeTags.get(0);
+                            endTime = msTimeTags.get(msTimeTags.size()-1);
+                            timeDiff = endTime - startTime;              
+                            
+                            //println("st: "+startTime+"  end:"+endTime+"  diff:"+timeDiff);
+
+                            firstRun = true;
+                        }
+                        animeNo = (int)random(3);
+                        animeNo = 0;
+                        endFlag = 0;
+
                     }
 
-                    startTime = msTimeTags.get(0);
-                    endTime = msTimeTags.get(msTimeTags.size()-1);
-                    timeDiff = endTime - startTime;              
-                    
-                    //println("st: "+startTime+"  end:"+endTime+"  diff:"+timeDiff);
+                    nowTime = millis() - stMillis;
 
-                    firstRun = true;
+                    //println("start: "+ startTime + "   now:"+ nowTime );
+
+                    if(startTime <= nowTime){ //動作きめる
+                        switch(animeNo){
+                            case 0:
+                                strScroll(timeDiff);
+                                break;
+                            case 1:
+                                strFromUpDown();
+                                break;
+                            case 2:
+                                charAppearLeftToRight();
+                                break;
+                        }
+
+                    }  
+
+                }else{
+                    kasiNo++;
                 }
-                animeNo = (int)random(3);
-                animeNo = 0;
-                endFlag = 0;
 
+            }else{
+                while(player.isPlaying()){
+                background(255);
+                }
             }
-
-            nowTime = millis() - stMillis;
-
-            //println("start: "+ startTime + "   now:"+ nowTime );
-
-            if(startTime <= nowTime){ //動作きめる
-                switch(animeNo){
-                    case 0:
-                        strScroll(timeDiff);
-                        break;
-                    case 1:
-                        strFromUpDown();
-                        break;
-                    case 2:
-                        charAppearLeftToRight();
-                        break;
-                }
-
-            }  
-
-        }else{
-            kasiNo++;
-        }
-
-    }else{
-        while(player.isPlaying()){
-        background(255);
-        }
+            break;
     }
-    
 }
+
 
 public void stop(){
     player.close();
