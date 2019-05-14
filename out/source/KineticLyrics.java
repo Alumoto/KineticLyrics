@@ -55,8 +55,8 @@ public static final int WIDTH = 1200;
 public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-final String LYRICS_DIR = "../../kra";
-final String MUSICS_DIR = "../music";
+final String LYRICS_DIR = "D:/git/KineticLyrics/kra";
+final String MUSICS_DIR = "D:/git/music";
 String LYRICS_FILE = "tosyokan.kra";
 String MUSIC_FILE = "図書館で会った人だぜ.mp3";
 String[] kasi = null;
@@ -97,6 +97,9 @@ int timeDiff;
 int nowTime;
 String runMode = null;
 
+String karList[] = null;
+String mscList[] = null;
+
 public void settings(){
     size(WIDTH, HEIGHT);
 }
@@ -111,14 +114,13 @@ public void setup(){
     textSize(TX_SIZE);
     textAlign(CENTER, CENTER);
     fill(0);
-    println( LYRICS_DIR +"/"+ LYRICS_FILE );
     kasi = loadStrings( LYRICS_DIR +"/"+ LYRICS_FILE );
     
     minim=new Minim(this);
     player = minim.loadFile( MUSICS_DIR +"/"+  MUSIC_FILE );
 
-    String karList[] = karDir.list();
-    String mscList[] = mscDir.list();
+    karList = karDir.list();
+    mscList = mscDir.list();
     
 
     //読み込み成功チェック
@@ -145,7 +147,6 @@ public void setup(){
         }
     }
 
-
     switch(getSuffix(LYRICS_FILE)){
         case "txt":
             mode = 0;
@@ -156,22 +157,35 @@ public void setup(){
     }
     
     runMode = "SELECT";
-
+    println(karList[2]);
     stMillis = millis();
-    player.play();
+    //player.play();
 }
 
-
+int selPointer = 0;
+int karPointer = 0;
+int mscPointer = 0;
 
 public void draw(){
+
     background(255);
     switch(runMode){
 
-
         case "SELECT":
             //歌詞ファイル・音源セレクト
+            if(selPointer < 0) selPointer += 1;
+            if(selPointer > 1) selPointer -= 1;
+            if(karPointer < 0) karPointer += 1;
+            if(karPointer > karList.length-1) karPointer -= 1;
+            if(mscPointer < 0) mscPointer += 1;
+            if(mscPointer > mscList.length-1) mscPointer -= 1;
 
-            runMode = "PLAY";
+            textSize(100);
+            textAlign(CENTER, CENTER);
+            text(karList[karPointer], WIDTH/2, HEIGHT/3);
+            text(mscList[mscPointer], WIDTH/2, HEIGHT*2/3);
+
+            //runMode = "PLAY";
             break;
         
 
@@ -239,6 +253,33 @@ public void draw(){
             break;
     }
 }
+
+public void keyPressed(){
+    if(keyCode == RIGHT){
+            if(selPointer == 0){
+                karPointer += 1;
+            }
+            if(selPointer == 1){
+                mscPointer += 1;
+            }
+            println(selPointer);
+    }
+    if(keyCode == LEFT){
+            if(selPointer == 0){
+                karPointer -= 1;
+            }
+            if(selPointer == 1){
+                mscPointer -= 1;
+            }
+    }
+    if(keyCode == UP){
+            selPointer = 0;
+    }
+    if(keyCode == DOWN){
+            selPointer = 1;
+    }
+    
+} 
 
 
 public void stop(){
