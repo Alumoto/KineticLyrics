@@ -11,10 +11,10 @@ public static final int WIDTH = 1200;
 public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-final String LYRICS_DIR = "D:/git/KineticLyrics/kra";
-final String MUSICS_DIR = "D:/git/music";
-String LYRICS_FILE = "tosyokan.kra";
-String MUSIC_FILE = "図書館で会った人だぜ.mp3";
+final String LYRICS_DIR = "kra";
+final String MUSICS_DIR = "../music";
+String LYRICS_FILE = null;
+String MUSIC_FILE = null;
 String[] kasi = null;
 
 String regex = "\\[(.+?)\\]";
@@ -70,57 +70,37 @@ void setup(){
     textSize(TX_SIZE);
     textAlign(CENTER, CENTER);
     fill(0);
-    kasi = loadStrings( LYRICS_DIR +"/"+ LYRICS_FILE );
     
-    minim=new Minim(this);
-    player = minim.loadFile( MUSICS_DIR +"/"+  MUSIC_FILE );
+    println(KineticLyrics.class.getResource("KineticLyrics.class"));
 
+    minim=new Minim(this);
+    
     karList = karDir.list();
     mscList = mscDir.list();
     
 
     //読み込み成功チェック
-    if( kasi == null ){
-        println( LYRICS_FILE + " 読み込み失敗" );
+    
+    if( mscList == null ){
+        println( "musicフォルダ内ファイルの取得に失敗");
         exit();
     }
     if( karList == null ){
         println( "kraフォルダ内ファイルの取得に失敗" );
         exit();
     }
-    if( mscList == null ){
-        println( "musicフォルダ内ファイルの取得に失敗");
-        exit();
-    }
-    if( player == null){
-        println( "音楽ファイルが読み込まれていません");
-        exit();
-    }
 
-    for(int k = 0;k<kasi.length;k++){
-        if(kasi[k].length() != 0){
-            if(kasi[k].charAt(0) == '@') kasi[k] = "";
-        }
-    }
 
-    switch(getSuffix(LYRICS_FILE)){
-        case "txt":
-            mode = 0;
-            break;
-        case "kra":
-            mode = 1;
-            break;
-    }
+    
     
     runMode = "SELECT";
-    println(karList[2]);
-    stMillis = millis();
-    //player.play();
+    
 }
 
 int selPointer = 0;
 int karPointer = 0;
 int mscPointer = 0;
+boolean DECIDE = false;
 
 void draw(){
 
@@ -141,10 +121,41 @@ void draw(){
             text(karList[karPointer], WIDTH/2, HEIGHT/3);
             text(mscList[mscPointer], WIDTH/2, HEIGHT*2/3);
 
-            //runMode = "PLAY";
-            break;
-        
+            if(DECIDE){
+                MUSIC_FILE = mscList[mscPointer];
+                LYRICS_FILE = karList[karPointer];
 
+                player = minim.loadFile( MUSICS_DIR +"/"+  MUSIC_FILE );
+                kasi = loadStrings( LYRICS_DIR +"/"+ LYRICS_FILE );
+                
+                if( player == null){
+                    println( "音楽ファイルが読み込まれていません");
+                    exit();
+                }
+                if( kasi == null ){
+                    println( LYRICS_FILE + " 読み込み失敗" );
+                    exit();
+                }
+
+                for(int k = 0;k<kasi.length;k++){
+                    if(kasi[k].length() != 0){
+                        if(kasi[k].charAt(0) == '@') kasi[k] = "";
+                    }
+                }
+
+                switch(getSuffix(LYRICS_FILE)){
+                    case "txt":
+                        mode = 0;
+                        break;
+                    case "kra":
+                        mode = 1;
+                        break;
+                }
+
+                runMode = "PLAY";
+            }
+
+            break;
 
         case "PLAY":
             //再生
@@ -172,10 +183,12 @@ void draw(){
 
                             firstRun = true;
                         }
+                        
                         animeNo = (int)random(3);
                         animeNo = 0;
                         endFlag = 0;
-
+                        stMillis = millis();
+                        player.play();
                     }
 
                     nowTime = millis() - stMillis;
