@@ -55,8 +55,8 @@ public static final int WIDTH = 1200;
 public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-final String LYRICS_DIR = "kra";
-final String MUSICS_DIR = "../music";
+final String LYRICS_DIR = "D:/git/KineticLyrics/kra";
+final String MUSICS_DIR = "D:/git/music";
 String LYRICS_FILE = null;
 String MUSIC_FILE = null;
 String[] kasi = null;
@@ -111,7 +111,6 @@ public void setup(){
     //printArray(fontList);
     PFont font = createFont("コーポレート・ロゴＢ", TX_SIZE);
     textFont(font);
-    textSize(TX_SIZE);
     textAlign(CENTER, CENTER);
     fill(0);
     
@@ -144,6 +143,7 @@ public void setup(){
 int selPointer = 0;
 int karPointer = 0;
 int mscPointer = 0;
+int cursorY = 0;
 boolean DECIDE = false;
 
 public void draw(){
@@ -160,10 +160,19 @@ public void draw(){
             if(mscPointer < 0) mscPointer += 1;
             if(mscPointer > mscList.length-1) mscPointer -= 1;
 
-            textSize(100);
+            textSize(70);
             textAlign(CENTER, CENTER);
+            cursorY = (selPointer == 0) ? (HEIGHT / 3 + 10) : (2 * HEIGHT / 3 + 10);
+
+            fill(255,0,0);
+            text("____________", WIDTH/2, cursorY);
+
+            fill(0); 
             text(karList[karPointer], WIDTH/2, HEIGHT/3);
             text(mscList[mscPointer], WIDTH/2, HEIGHT*2/3);
+
+            textSize(40);
+            text("↑↓ / カーソル移動　←→ / 選択　Enter / 決定", WIDTH/2, HEIGHT - 50);
 
             if(DECIDE){
                 MUSIC_FILE = mscList[mscPointer];
@@ -195,7 +204,8 @@ public void draw(){
                         mode = 1;
                         break;
                 }
-
+                stMillis = millis();
+                player.play();
                 runMode = "PLAY";
             }
 
@@ -231,8 +241,7 @@ public void draw(){
                         animeNo = (int)random(3);
                         animeNo = 0;
                         endFlag = 0;
-                        stMillis = millis();
-                        player.play();
+                        
                     }
 
                     nowTime = millis() - stMillis;
@@ -269,27 +278,29 @@ public void draw(){
 
 public void keyPressed(){
     if(keyCode == RIGHT){
-            if(selPointer == 0){
-                karPointer += 1;
-            }
-            if(selPointer == 1){
-                mscPointer += 1;
-            }
-            println(selPointer);
+        if(selPointer == 0){
+            karPointer += 1;
+        }
+        if(selPointer == 1){
+            mscPointer += 1;
+        }
     }
     if(keyCode == LEFT){
-            if(selPointer == 0){
-                karPointer -= 1;
-            }
-            if(selPointer == 1){
-                mscPointer -= 1;
-            }
+        if(selPointer == 0){
+            karPointer -= 1;
+        }
+        if(selPointer == 1){
+            mscPointer -= 1;
+        }
     }
     if(keyCode == UP){
-            selPointer = 0;
+        selPointer = 0;
     }
     if(keyCode == DOWN){
-            selPointer = 1;
+        selPointer = 1;
+    }
+    if(keyCode == ENTER || keyCode == RETURN){
+        DECIDE = true;
     }
     
 } 
@@ -317,7 +328,7 @@ public void charAppearLeftToRight(){
     }else if(cnt > (txLength*div) + stop){
         if(cnt % div == 0)a++;
     }
-
+    textSize(TX_SIZE);
     text(kasi[kasiNo].substring(a, b), WIDTH/2, HEIGHT/2);
     cnt += sp;
 
@@ -334,6 +345,7 @@ public void charAppearLeftToRight(){
 public void strScroll(){
     textAlign(CENTER, CENTER);
     float txWidth = textWidth(kasi[kasiNo]);
+    textSize(TX_SIZE);
     text(kasi[kasiNo], (WIDTH+txWidth/2)-(cnt), HEIGHT/2);
     cnt += 10;
     if(WIDTH+txWidth-cnt <= 0){
@@ -347,6 +359,7 @@ public void strScroll(long timeDiff){
     
     textAlign(CENTER, CENTER);
     double txWidth = (double)textWidth(kasi[kasiNo]);
+    textSize(TX_SIZE);
     text(kasi[kasiNo], (int)((WIDTH+txWidth/2)-cnt), HEIGHT/2);
     double W =(double) WIDTH + txWidth;
     sp = W * (1000 / (60 * (double)timeDiff));
@@ -378,6 +391,7 @@ public void strFromUpDown(){
         y -= sp * ((-2*f)+1);
     }
     textAlign(CENTER, CENTER);
+    textSize(TX_SIZE);
     text(kasi[kasiNo], x, y);
     cnt++;
     if(cnt > 120){
