@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.text.*;
 import java.io.File;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import ddf.minim.*;
 
 Minim minim;
@@ -11,8 +14,12 @@ public static final int WIDTH = 1200;
 public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-final String LYRICS_DIR = "D:/git/KineticLyrics/kra";
-final String MUSICS_DIR = "D:/git/music";
+
+
+Path parentPath = Paths.get(KineticLyrics.class.getResource("KineticLyrics.class").toString().substring(6)).getParent().getParent();
+
+final String LYRICS_DIR = parentPath + "/kra";
+final String MUSICS_DIR = parentPath.getParent() + "/music";
 String LYRICS_FILE = null;
 String MUSIC_FILE = null;
 String[] kasi = null;
@@ -70,7 +77,7 @@ void setup(){
     textAlign(CENTER, CENTER);
     fill(0);
     
-    println(KineticLyrics.class.getResource("KineticLyrics.class"));
+    println(parentPath);
 
     minim=new Minim(this);
     
