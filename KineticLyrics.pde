@@ -50,6 +50,7 @@ int endFlag = 1;
 
 int x = WIDTH/2;
 int y = HEIGHT/2;
+int tsz = 0;
 
 boolean firstRun = true;
 
@@ -306,10 +307,11 @@ void charAppearLeftToRight(){
 }
 
 void strScroll(){
+
     textAlign(CENTER, CENTER);
     float txWidth = textWidth(kasi[kasiNo]);
     textSize(TX_SIZE);
-    text(kasi[kasiNo], (WIDTH+txWidth/2)-(cnt), HEIGHT/2);
+    text(kasi[kasiNo], (WIDTH+txWidth/2)-(cnt), y);
     cnt += 10;
     if(WIDTH+txWidth-cnt <= 0){
         cnt = 0;
@@ -320,10 +322,15 @@ void strScroll(){
 
 void strScroll(long timeDiff){
     
+    if(cnt == 0){
+        y = (int)(HEIGHT/4 + random(HEIGHT/2));
+        tsz = 60 + (int)random(140);
+    }
+
     textAlign(CENTER, CENTER);
     double txWidth = (double)textWidth(kasi[kasiNo]);
-    textSize(TX_SIZE);
-    text(kasi[kasiNo], (int)((WIDTH+txWidth/2)-cnt), HEIGHT/2);
+    textSize(tsz);
+    text(kasi[kasiNo], (int)((WIDTH+txWidth/2)-cnt), y);
     double W =(double) WIDTH + txWidth;
     sp = W * (1000 / (60 * (double)timeDiff));
     if(sp < 1){
