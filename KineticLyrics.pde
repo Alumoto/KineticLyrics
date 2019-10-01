@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import ddf.minim.*;
 
 Minim minim;
@@ -14,7 +15,7 @@ public static final int WIDTH = 1200;
 public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-
+HashMap<String, String> confmap = new HashMap<String, String>();
 
 Path parentPath = Paths.get(KineticLyrics.class.getResource("KineticLyrics.class").toString().substring(6)).getParent().getParent();
 
@@ -71,8 +72,13 @@ void settings(){
 void setup(){
     smooth();
     background(100);
-    //String[] fontList = PFont.list();
-    //printArray(fontList);
+    // String[] fontList = PFont.list();
+    // printArray(fontList);
+
+    //put default settings
+    confmap.put("font", "コーポレート・ロゴＢ");
+
+
     PFont font = createFont("コーポレート・ロゴＢ", TX_SIZE);
     textFont(font);
     textAlign(CENTER, CENTER);
@@ -109,6 +115,7 @@ int karPointer = 0;
 int mscPointer = 0;
 int cursorY = 0;
 boolean DECIDE = false;
+boolean drawloading = false;
 
 void draw(){
 
@@ -124,53 +131,71 @@ void draw(){
             if(mscPointer < 0) mscPointer += 1;
             if(mscPointer > mscList.length-1) mscPointer -= 1;
 
-            textSize(70);
-            textAlign(CENTER, CENTER);
-            cursorY = (selPointer == 0) ? (HEIGHT / 3 + 10) : (2 * HEIGHT / 3 + 10);
-
-            fill(255,0,0);
-            text("____________", WIDTH/2, cursorY);
-
-            fill(0); 
-            text(karList[karPointer], WIDTH/2, HEIGHT/3);
-            text(mscList[mscPointer], WIDTH/2, HEIGHT*2/3);
-
-            textSize(40);
-            text("↑↓ / カーソル移動　←→ / 選択　Enter / 決定", WIDTH/2, HEIGHT - 50);
 
             if(DECIDE){
-                MUSIC_FILE = mscList[mscPointer];
-                LYRICS_FILE = karList[karPointer];
 
-                player = minim.loadFile( MUSICS_DIR +"/"+  MUSIC_FILE );
-                kasi = loadStrings( LYRICS_DIR +"/"+ LYRICS_FILE );
-                
-                if( player == null){
-                    println( "音楽ファイルが読み込まれていません");
-                    exit();
-                }
-                if( kasi == null ){
-                    println( LYRICS_FILE + " 読み込み失敗" );
-                    exit();
-                }
+                if(!drawloading){
+                    background(255);
+                    fill(0);
+                    text("Now Loading...", WIDTH/2, HEIGHT/2);
+                    drawloading = true;
+                }else{
+                    MUSIC_FILE = mscList[mscPointer];
+                    LYRICS_FILE = karList[karPointer];
 
-                for(int k = 0;k<kasi.length;k++){
-                    if(kasi[k].length() != 0){
-                        if(kasi[k].charAt(0) == '@') kasi[k] = "";
+                    player = minim.loadFile( MUSICS_DIR +"/"+  MUSIC_FILE );
+                    kasi = loadStrings( LYRICS_DIR +"/"+ LYRICS_FILE );
+                    
+                    if( player == null){
+                        println( "音楽ファイルが読み込まれていません");
+                        exit();
                     }
-                }
+                    if( kasi == null ){
+                        println( LYRICS_FILE + " 読み込み失敗" );
+                        exit();
+                    }
 
-                switch(getSuffix(LYRICS_FILE)){
-                    case "txt":
-                        mode = 0;
-                        break;
-                    case "kra":
-                        mode = 1;
-                        break;
+                    for(int k = 0;k<kasi.length;k++){
+                        if(kasi[k].length() != 0){
+                            if(kasi[k].charAt(0) == '@'){
+                                String[] buf = kasi[k].substring(1).split("=");
+                                println(buf);
+                                confmap.put(buf[0], buf[1]);
+                                kasi[k] = "";
+                            }
+                        }
+                    }
+
+                    switch(getSuffix(LYRICS_FILE)){
+                        case "txt":
+                            mode = 0;
+                            break;
+                        case "kra":
+                            mode = 1;
+                            break;
+                    }
+
+                    PFont mfont = createFont(confmap.get("font"), TX_SIZE);
+                    textFont(mfont);
+
+                    stMillis = millis();
+                    player.play();
+                    runMode = "PLAY";
                 }
-                stMillis = millis();
-                player.play();
-                runMode = "PLAY";
+            }else{
+                textSize(70);
+                textAlign(CENTER, CENTER);
+                cursorY = (selPointer == 0) ? (HEIGHT / 3 + 10) : (2 * HEIGHT / 3 + 10);
+
+                fill(255,0,0);
+                text("____________", WIDTH/2, cursorY);
+
+                fill(0); 
+                text(karList[karPointer], WIDTH/2, HEIGHT/3);
+                text(mscList[mscPointer], WIDTH/2, HEIGHT*2/3);
+
+                textSize(40);
+                text("↑↓ / カーソル移動　←→ / 選択　Enter / 決定", WIDTH/2, HEIGHT - 50);
             }
 
             break;
