@@ -4,6 +4,8 @@ import processing.event.*;
 import processing.opengl.*; 
 
 import java.util.ArrayList; 
+import java.util.Arrays; 
+import java.util.List; 
 import java.text.*; 
 import java.io.File; 
 import java.net.URI; 
@@ -55,6 +57,8 @@ public class KineticLyrics extends PApplet {
 
 
 
+
+
 Minim minim;
 AudioPlayer player;
 
@@ -63,7 +67,7 @@ public static final int WIDTH = 1200;
 public static final int HEIGHT = 980;
 public static final int TX_SIZE = 100;
 
-HashMap<String, String> confmap = new HashMap<String, String>();
+HashMap<String, String> confMap = new HashMap<String, String>();
 
 Path parentPath = Paths.get(KineticLyrics.class.getResource("KineticLyrics.class").toString().substring(6)).getParent().getParent();
 
@@ -120,11 +124,11 @@ public void settings(){
 public void setup(){
     smooth();
     background(100);
-    // String[] fontList = PFont.list();
-    // printArray(fontList);
 
     //put default settings
-    confmap.put("font", "コーポレート・ロゴＢ");
+    confMap.put("font", "コーポレート・ロゴＢ");
+    confMap.put("title", "");
+    confMap.put("fontfile", null);
 
 
     PFont font = createFont("コーポレート・ロゴＢ", TX_SIZE);
@@ -208,7 +212,7 @@ public void draw(){
                             if(kasi[k].charAt(0) == '@'){
                                 String[] buf = kasi[k].substring(1).split("=");
                                 println(buf);
-                                confmap.put(buf[0], buf[1]);
+                                confMap.put(buf[0], buf[1]);
                                 kasi[k] = "";
                             }
                         }
@@ -223,8 +227,17 @@ public void draw(){
                             break;
                     }
 
-                    PFont mfont = createFont(confmap.get("font"), TX_SIZE);
-                    textFont(mfont);
+
+                    List<String> fontList = Arrays.asList(PFont.list());
+                    int idx = fontList.indexOf(confMap.get("font"));
+
+                    if(idx >= 0){
+                        PFont mfont = createFont(fontList.get(idx), TX_SIZE);
+                        textFont(mfont);
+                    }else if(confMap.get("fontfile") != null){
+                        PFont mfont = createFont(confMap.get("fontfile"), TX_SIZE);
+                        textFont(mfont);
+                    }
 
                     stMillis = millis();
                     player.play();
@@ -308,8 +321,14 @@ public void draw(){
                 while(player.isPlaying()){
                 background(255);
                 }
+                runMode = "END";
             }
             break;
+        
+        case "END":
+            text(confMap.get("title"), WIDTH/2, HEIGHT/2);
+            break;
+            
     }
 }
 
